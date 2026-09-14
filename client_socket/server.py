@@ -15,12 +15,18 @@ def run_server(ip, port):
 
     while True:
         conn, addr = server.accept()
-        message = ""
+        message = b""
+        num = 0
         while True:
             data = conn.recv(4096)
-            if not data:
+            if len(data) == 0:
                 break
-            message += struct.unpack("<", data)
+
+            num = struct.unpack("<i", data[:4])[0]
+            data = data[4:]
+            if data:
+                message += data
+            message = message.decode("utf-8")
             print(f"From client: {message}")
         conn.close()
         print("client disconnected")

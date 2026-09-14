@@ -9,14 +9,17 @@ import struct
 
 
 def send_data(server_ip, server_port, data):
-    print(socket.gethostbyname('localhost'))
+    print(socket.gethostbyname("localhost"))
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((server_ip, server_port))
-    full_message = struct.pack('@', sys.getsizeof(data))
-    struct.pack_into('<',full_message, 4,data)
+    data = bytes(data, 'utf-8')
+
+    header = len(data)
+    
+    full_message = struct.pack('<I', header) + struct.pack(f'<{header}s', data)
+
     client.sendall(full_message)
     client.close()
-    pass
 
 
 ###########################################################
@@ -25,25 +28,25 @@ def send_data(server_ip, server_port, data):
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Send data to server.')
-    parser.add_argument('server_ip', type=str, help="the server's ip")
-    parser.add_argument('server_port', type=int,help="the server's port")
-    parser.add_argument('data', type=str, help='the data')
+    parser = argparse.ArgumentParser(description="Send data to server.")
+    parser.add_argument("server_ip", type=str, help="the server's ip")
+    parser.add_argument("server_port", type=int, help="the server's port")
+    parser.add_argument("data", type=str, help="the data")
     return parser.parse_args()
 
 
 def main():
-    '''
+    """
     Implementation of CLI and sending data to server.
-    '''
+    """
     args = get_args()
     try:
         send_data(args.server_ip, args.server_port, args.data)
-        print('Done.')
     except Exception as error:
-        print(f'ERROR: {error}')
+        print(f"ERROR: {error}")
         return 1
+    return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
