@@ -12,11 +12,11 @@ def send_data(server_ip, server_port, data):
     print(socket.gethostbyname("localhost"))
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((server_ip, server_port))
-    data = bytes(data, 'utf-8')
+    data = bytes(data, "utf-8")
 
     header = len(data)
-    
-    full_message = struct.pack('<I', header) + struct.pack(f'<{header}s', data)
+
+    full_message = struct.pack("<I", header) + struct.pack(f"<{header}s", data)
 
     client.sendall(full_message)
     client.close()
