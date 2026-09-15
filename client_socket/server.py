@@ -2,7 +2,8 @@ import argparse
 import sys
 import socket
 import struct
-
+import threading
+import time
 ###########################################################
 ####################### YOUR CODE #########################
 ###########################################################
@@ -12,23 +13,33 @@ def run_server(ip, port):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((ip, port))
     server.listen()
+    connections = {}
+    threads = []
 
     while True:
         conn, addr = server.accept()
-        message = ""
-        num = 0
-        while True:
-            data = conn.recv(4096)
-            if len(data) == 0:
-                break
+        if not addr in connections.items():
+            connections[conn] = addr
+            t = threading.Thread(target=handle_client, args=(conn, addr))
+            threads.append(t)
+            t.start()
 
-            num = struct.unpack("<i", data[:4])[0]
-            data = data[4:]
-            if data:
-                message += data.decode("utf-8")
-        print(f"From client: {message}")
-        conn.close()
-        print("client disconnected")
+
+def handle_client(conn, addr):
+    message = ""
+    num = 0
+    while True:
+        data = conn.recv(4096)
+        if len(data) == 0:
+            break
+        num = struct.unpack("<i", data[:4])[0]
+        data = data[4:]
+        if data:
+            message += data.decode("utf-8")
+    print(f"From client: {message}")
+    # time.sleep(5)
+    conn.close()
+    print("client disconnected")
 
 
 ###########################################################
