@@ -8,18 +8,34 @@ import struct
 ###########################################################
 
 
-def send_data(server_ip, server_port, data):
-    print(socket.gethostbyname("localhost"))
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect((server_ip, server_port))
-    data = bytes(data, "utf-8")
+def run_server(ip, port):
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((ip, port))
+    server.listen()
 
-    header = len(data)
+    while True:
+        conn, addr = server.accept()
+        message = ""
 
-    full_message = struct.pack("<I", header) + struct.pack(f"<{header}s", data)
+        while True:
+            packet_message = ""
+            data = conn.recv(4096)
+            if len(data) == 0:
+                break
 
-    client.sendall(full_message)
-    client.close()
+            num = struct.unpack("<I", data[:4])[0]
+            packet_message += data[4:].decode("utf-8")
+
+            while num < len(packet_message):
+                data = conn.recv(4096)
+                if len(data) == 0:
+                    break
+                packet_message += data.decode("utf-8")
+            if packet_message:
+                message += packet_message
+        print(f"From client: {message}")
+        conn.close()
+        print("client disconnected")
 
 
 ###########################################################
@@ -31,7 +47,6 @@ def get_args():
     parser = argparse.ArgumentParser(description="Send data to server.")
     parser.add_argument("server_ip", type=str, help="the server's ip")
     parser.add_argument("server_port", type=int, help="the server's port")
-    parser.add_argument("data", type=str, help="the data")
     return parser.parse_args()
 
 
@@ -41,11 +56,10 @@ def main():
     """
     args = get_args()
     try:
-        send_data(args.server_ip, args.server_port, args.data)
+        run_server(args.server_ip, args.server_port)
     except Exception as error:
         print(f"ERROR: {error}")
         return 1
-    return 0
 
 
 if __name__ == "__main__":
