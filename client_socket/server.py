@@ -16,16 +16,23 @@ def run_server(ip, port):
     while True:
         conn, addr = server.accept()
         message = ""
-        num = 0
+
         while True:
+            packet_message = ""
             data = conn.recv(4096)
             if len(data) == 0:
                 break
 
-            num = struct.unpack("<i", data[:4])[0]
-            data = data[4:]
-            if data:
-                message += data.decode("utf-8")
+            num = struct.unpack("<I", data[:4])[0]
+            packet_message += data[4:].decode("utf-8")
+
+            while num < len(packet_message):
+                data = conn.recv(4096)
+                if len(data) == 0:
+                    break
+                packet_message += data.decode("utf-8")
+            if packet_message:
+                message += packet_message
         print(f"From client: {message}")
         conn.close()
         print("client disconnected")
