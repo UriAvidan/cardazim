@@ -13,8 +13,7 @@ from connection import Connection
 def send_data(server_ip, server_port, data):
 
     with Connection.connect(Connection, server_ip, server_port) as client:
-        data = bytes(data, "utf-8")
-
+        
         client.send_message(data)
 
 

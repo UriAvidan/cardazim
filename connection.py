@@ -16,9 +16,10 @@ class Connection:
             f"<Connection from {connected_to_port}  to {socket.gethostbyname('localhost')} >"
         )
 
-    def send_message(self, message: bytes):
-        header = len(message)
-        full_message = struct.pack("<I", header) + struct.pack(f"<{header}s", message)
+    def send_message(self, message: str):
+        data = bytes(message, "utf-8")
+        header = len(data)
+        full_message = struct.pack("<I", header) + struct.pack(f"<{header}s", data)
         self.connection.sendall(full_message)
 
     def recieve_message(self):
