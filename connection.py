@@ -5,13 +5,16 @@ import struct
 import threading
 import time
 
-class connection:
+
+class Connection:
     def __init__(self, connection: socket.socket):
         self.connection = connection
 
     def __repr__(self):
         connected_to_port = self.connection.getpeername()
-        print(f"<Connection from {connected_to_port}  to {socket.gethostbyname("localhost")} >")
+        print(
+            f"<Connection from {connected_to_port}  to {socket.gethostbyname('localhost')} >"
+        )
 
     def send_message(self, message: bytes):
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,27 +43,25 @@ class connection:
                 data = self.connection.recv(4096)
                 if len(data) == 0:
                     self.close()
-                    raise("connection lost befor end of message")
+                    raise ("connection lost befor end of message")
                 packet_message += data.decode("utf-8")
-                
+
             if packet_message:
                 message += packet_message
         return message
 
     def close(self):
+        print("connection closed")
         self.connection.close()
 
     def connect(cls, host, port):
         conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        conn.connect((host,port))
-        
-        return connection(conn)
+        conn.connect((host, port))
 
+        return Connection(conn)
 
+    def __enter__(self):
+        return self
 
-    def __enter__(host, port):
-        return connection.connect(host, port)
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, exc_traceback):
         self.close()
-
-

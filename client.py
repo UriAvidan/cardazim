@@ -40,12 +40,8 @@ def main():
     Implementation of CLI and sending data to server.
     """
     args = get_args()
-    try:
-        send_data(args.server_ip, args.server_port, args.data)
-    except Exception as error:
-        print(f"ERROR: {error}")
-        return 1
-    return 0
+    send_data(args.server_ip, args.server_port, args.data)
+
 
 
 if __name__ == "__main__":
