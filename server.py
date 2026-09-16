@@ -5,25 +5,36 @@ import struct
 import threading
 import time
 import connection
+import listener
 ###########################################################
 ####################### YOUR CODE #########################
 ###########################################################
 
 
 def run_server(ip, port):
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((ip, port))
-    server.listen()
-    connections = {}
-    threads = []
 
-    while True:
-        conn, addr = server.accept()
-        if not addr in connections.items():
-            connections[conn] = addr
+    with listener.listener(ip, port) as server:
+        connections = {}
+        while True:
+            conn, addr = server.accept()
+            if not addr in connections.items():
+                connections[conn] = addr
             t = threading.Thread(target=handle_client, args=(conn, addr))
-            threads.append(t)
             t.start()
+
+    # server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # server.bind((ip, port))
+    # server.listen()
+    # connections = {}
+    # threads = []
+
+    # while True:
+    #     conn, addr = server.accept()
+    #     if not addr in connections.items():
+    #         connections[conn] = addr
+    #         t = threading.Thread(target=handle_client, args=(conn, addr))
+    #         threads.append(t)
+    #         t.start()
 
 
 def handle_client(conn, addr):
