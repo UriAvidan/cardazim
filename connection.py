@@ -32,18 +32,15 @@ class Connection:
 
         while True:
             packet_message = ""
-            data = self.connection.recv(4096)
-            if len(data) == 0:
+            num = self.connection.recv(4)
+            if not num:
                 break
-            num = struct.unpack("<I", data[:4])[0]
+            num = struct.unpack("<I", num)[0]
 
-            packet_message += data[4:].decode("utf-8")
-
-            while num < len(packet_message):
-                data = self.connection.recv(4096)
+            while num > len(packet_message):
+                data = self.connection.recv(num - len(packet_message))
                 if len(data) == 0:
-                    self.close()
-                    raise ("connection lost befor end of message")
+                    raise Exception("Connection lost before end of message")
                 packet_message += data.decode("utf-8")
 
             if packet_message:
