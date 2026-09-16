@@ -1,7 +1,9 @@
 import argparse
-import sys
 import socket
 import struct
+import sys
+
+from Connection import Connection
 
 ###########################################################
 ####################### YOUR CODE #########################
@@ -9,17 +11,23 @@ import struct
 
 
 def send_data(server_ip, server_port, data):
-    print(socket.gethostbyname("localhost"))
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect((server_ip, server_port))
-    data = bytes(data, "utf-8")
 
-    header = len(data)
+    with Connection.connect(Connection, server_ip, server_port) as client:
+        data = bytes(data, "utf-8")
 
-    full_message = struct.pack("<I", header) + struct.pack(f"<{header}s", data)
+        client.send_message(data)
 
-    client.sendall(full_message)
-    client.close()
+    # print(socket.gethostbyname("localhost"))
+    # client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # client.connect((server_ip, server_port))
+    # data = bytes(data, "utf-8")
+
+    # header = len(data)
+
+    # full_message = struct.pack("<I", header) + struct.pack(f"<{header}s", data)
+
+    # client.sendall(full_message)
+    # client.close()
 
 
 ###########################################################
@@ -40,12 +48,7 @@ def main():
     Implementation of CLI and sending data to server.
     """
     args = get_args()
-    try:
-        send_data(args.server_ip, args.server_port, args.data)
-    except Exception as error:
-        print(f"ERROR: {error}")
-        return 1
-    return 0
+    send_data(args.server_ip, args.server_port, args.data)
 
 
 if __name__ == "__main__":

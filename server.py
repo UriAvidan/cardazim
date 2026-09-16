@@ -1,51 +1,33 @@
 import argparse
+import sys
 import socket
 import struct
-import sys
 import threading
-
+import time
+import Connection
+import listener
 ###########################################################
 ####################### YOUR CODE #########################
 ###########################################################
 
 
 def run_server(ip, port):
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((ip, port))
-    server.listen()
-    connections = {}
-    threads = []
 
-    while True:
-        conn, addr = server.accept()
-        if not addr in connections.items():
-            connections[conn] = addr
+    with listener.listener(ip, port) as server:
+        connections = {}
+        while True:
+            conn, addr = server.accept()
+            if not addr in connections.items():
+                connections[conn] = addr
             t = threading.Thread(target=handle_client, args=(conn, addr))
-            threads.append(t)
             t.start()
 
 
+
 def handle_client(conn, addr):
-    message = ""
+    with Connection.Connection(conn) as c:
+        print(c.recieve_message())
 
-    while True:
-        packet_message = ""
-        num = conn.recv(4)
-        if not num:
-            break
-        num = struct.unpack("<I", num)[0]
-
-        while num > len(packet_message):
-            data = conn.recv(num - len(packet_message))
-            if len(data) == 0:
-                raise Exception("Connection lost before end of message")
-            packet_message += data.decode("utf-8")
-        if packet_message:
-            message += packet_message
-    print(f"From client: {message}")
-    # time.sleep(5)
-    conn.close()
-    print("client disconnected")
 
 
 ###########################################################
