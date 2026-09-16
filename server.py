@@ -4,7 +4,7 @@ import socket
 import struct
 import threading
 import time
-import Connection
+import connection
 import listener
 ###########################################################
 ####################### YOUR CODE #########################
@@ -13,7 +13,7 @@ import listener
 
 def run_server(ip, port):
 
-    with listener.listener(ip, port) as server:
+    with listener.Listener(ip, port) as server:
         connections = {}
         while True:
             conn, addr = server.accept()
@@ -25,7 +25,7 @@ def run_server(ip, port):
 
 
 def handle_client(conn, addr):
-    with Connection.Connection(conn) as c:
+    with connection.Connection(conn) as c:
         print(c.recieve_message())
 
 
