@@ -17,21 +17,15 @@ class Connection:
         )
 
     def send_message(self, message: bytes):
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect(self.connection.getpeername())
-
         header = len(message)
-
         full_message = struct.pack("<I", header) + struct.pack(f"<{header}s", message)
-
-        client.sendall(full_message)
-        client.close()
+        self.connection.sendall(full_message)
 
     def recieve_message(self):
-        message = ""
+        message = b""
 
         while True:
-            packet_message = ""
+            packet_message = b""
             num = self.connection.recv(4)
             if not num:
                 break
@@ -41,11 +35,11 @@ class Connection:
                 data = self.connection.recv(num - len(packet_message))
                 if len(data) == 0:
                     raise Exception("Connection lost before end of message")
-                packet_message += data.decode("utf-8")
+                packet_message += data
 
             if packet_message:
                 message += packet_message
-        return message
+        return message.decode("utf-8")
 
     def close(self):
         print("connection closed")
