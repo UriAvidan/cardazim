@@ -1,9 +1,9 @@
 import argparse
-import sys
 import socket
 import struct
+import sys
 import threading
-import time
+
 ###########################################################
 ####################### YOUR CODE #########################
 ###########################################################
@@ -30,15 +30,15 @@ def handle_client(conn, addr):
 
     while True:
         packet_message = ""
-        data = conn.recv(4096)
-        if len(data) == 0:
+        num = conn.recv(4)
+        if not num:
             break
-        num = struct.unpack("<I", data[:4])[0]
-        packet_message += data[4:].decode("utf-8")
-        while num < len(packet_message):
-            data = conn.recv(4096)
+        num = struct.unpack("<I", num)[0]
+
+        while num > len(packet_message):
+            data = conn.recv(num - len(packet_message))
             if len(data) == 0:
-                break
+                raise Exception("Connection lost before end of message")
             packet_message += data.decode("utf-8")
         if packet_message:
             message += packet_message
@@ -65,11 +65,7 @@ def main():
     Implementation of CLI and sending data to server.
     """
     args = get_args()
-    try:
-        run_server(args.server_ip, args.server_port)
-    except Exception as error:
-        print(f"ERROR: {error}")
-        return 1
+    run_server(args.server_ip, args.server_port)
 
 
 if __name__ == "__main__":
